@@ -43,12 +43,12 @@ env LD_PRELOAD=/lib64/libtcmalloc.so ../src/firmware/posix/px4 posix-configs/SIT
 
 ## Sending MAVLink debug key / value pairs
 
-The code for this tutorial is available here:
+关于这部分的代码如下:
 
   * [Debug Tutorial Code](https://github.com/PX4/Firmware/blob/master/src/examples/px4_mavlink_debug/px4_mavlink_debug.c)
   * [Enable the tutorial app](https://github.com/PX4/Firmware/tree/master/cmake/configs) by uncommenting / enabling the mavlink debug app in the config of your board
 
-All required to set up a debug publication is this code snippet. First add the header file:
+设置一个调试发布topic只需要小部分代码，首先是头文件：
 
 <div class="host-code"></div>
 
@@ -57,15 +57,13 @@ All required to set up a debug publication is this code snippet. First add the h
 #include <uORB/topics/debug_key_value.h>
 ```
 
-Then advertise the debug value topic (one advertisement for different published names is sufficient). Put this in front of your main loop:
+然后广告调试值主题（不同发布名称只需要一次广告）。把下面部分放在主循环之前：
 
+## 在NuttX中调试硬故障
 
-## Debugging Hard Faults in NuttX
-
-A hard fault is a state when the operating system detects that it has no valid instructions to execute. This is typically the case when key areas in RAM have been corrupted. A typical scenario is when incorrect memory access smashed the stack and the processor sees that the address in memory is not a valid address for the microprocessors's RAM.
-
-  * NuttX maintains two stacks: The IRQ stack for interrupt processing and the user stack
-  * The stack grows downward. So the highest address in the example below is 0x20021060, the size is 0x11f4 (4596 bytes) and consequently the lowest address is 0x2001fe6c.
+硬故障是由于运行的系统检测到没有有效的可指令执行时出现的状态。经常是因为RAM中的关键部分出现崩溃。典型的情况是，不正确的内存地址进入堆栈让处理器认为内存中的地址无效了。
+  * NuttX有两个堆栈: 中断处理的IRQ堆栈和用户堆栈
+  * 堆栈向下堆积，所以下面例子中栈顶的地址是 0x20021060, 大小是0x11f4 (4596 bytes)，栈低地址是 0x2001fe6c.
 
 ```bash
 Assertion failed at file:armv7-m/up_hardfault.c line: 184 task: ekf_att_pos_estimator
@@ -114,7 +112,7 @@ xPSR: 61000000 BASEPRI: 00000000 CONTROL: 00000000
 EXC_RETURN: ffffffe9
 ```
 
-To decode the hardfault, load the *exact* binary into the debugger:
+为了解码硬故障，把二进制文件exact导入调试器:
 
 <div class="host-code"></div>
 
@@ -122,7 +120,7 @@ To decode the hardfault, load the *exact* binary into the debugger:
 arm-none-eabi-gdb build_px4fmu-v2_default/src/firmware/nuttx/firmware_nuttx
 ```
 
-Then in the GDB prompt, start with the last instructions in R8, with the first address in flash (recognizable because it starts with `0x080`, the first is `0x0808439f`). The execution is left to right. So one of the last steps before the hard fault was when ```mavlink_log.c``` tried to publish something, 
+然后在GDB的提示中，从R8的最后一条指令也就是内存中的第一个地址开始，(因为地址从 `0x080`开始, 第一条指令是 `0x0808439f`)。 从左到右执行，硬故障前的最后一步是 ```mavlink_log.c``` 要发布东西,这样就找到了硬故障 
 
 <div class="host-code"></div>
 
