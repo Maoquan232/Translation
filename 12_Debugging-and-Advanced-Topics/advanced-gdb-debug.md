@@ -2,13 +2,11 @@
 
 官网英文原文地址：http://dev.px4.io/advanced-gdb-debugging.html
 
-自驾仪通过GBD或者LLDB运行PX4支撑的调试。
+运行PX4的自驾仪支持通过GDB或LLDB进行调试
 
-The autopilots running PX4 support debugging via GDB or LLDB.
+## 查看内存消耗
 
-## Identifying large memory consumers
-
-The command below will list the largest static allocations:
+下面的命令可以列出最大的静态内存分配
 
 <div class="host-code"></div>
 
@@ -16,22 +14,21 @@ The command below will list the largest static allocations:
 arm-none-eabi-nm --size-sort --print-size --radix=dec build_px4fmu-v2_default/src/firmware/nuttx/firmware_nuttx | grep " [bBdD] "
 ```
 
-This NSH command provides the remaining free memory:
+NSH中的命令可以查看剩余内存：
 
 ```bash
 free
 ```
 
-And the top command shows the stack usage per application:
+Top命令可以看到每个应用占用的堆栈使用：
 
 ```
 top
 ```
+应用的堆栈使用是通过stack coloring计算，因此得到的并不是当前堆栈使用情况，，而是从任务开始以来最大的堆栈占用值。
 
-Stack usage is calculated with stack coloring and thus is not the current usage, but the maximum since the start of the task.
-
-### Heap allocations
-Dynamic heap allocations can be traced on POSIX in SITL with [gperftools](https://github.com/gperftools/gperftools).
+### 堆栈分配
+动态堆栈分配可以在运行SITL仿真时通过POSIX中的[gperftools]进行追踪(https://github.com/gperftools/gperftools).
 Once installed, it can be used with:
   * Run jmavsim: `cd Tools/jMAVSim/out/production && java -Djava.ext.dirs= -jar jmavsim_run.jar -udp 127.0.0.1:14560`
   * Then:
