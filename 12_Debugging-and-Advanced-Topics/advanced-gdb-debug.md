@@ -28,8 +28,8 @@ top
 应用的堆栈使用是通过stack coloring计算，因此得到的并不是当前堆栈使用情况，，而是从任务开始以来最大的堆栈占用值。
 
 ### 堆栈分配
-动态堆栈分配可以在运行SITL仿真时通过POSIX中的[gperftools]进行追踪(https://github.com/gperftools/gperftools).
-Once installed, it can be used with:
+动态堆栈分配可以在运行SITL仿真时通过POSIX中的[gperftools](https://github.com/gperftools/gperftools)进行追踪.
+安装好后，按下面方法使用:
   * Run jmavsim: `cd Tools/jMAVSim/out/production && java -Djava.ext.dirs= -jar jmavsim_run.jar -udp 127.0.0.1:14560`
   * Then:
 
@@ -38,11 +38,8 @@ cd build_posix_sitl_default/tmp
 export HEAPPROFILE=/tmp/heapprofile.hprof
 env LD_PRELOAD=/lib64/libtcmalloc.so ../src/firmware/posix/px4 posix-configs/SITL/init/lpe/iris
  +pprof --pdf ../src/firmware/posix/px4 /tmp/heapprofile.hprof.0001.heap > heap.pdf
-```
-
-It will generate a pdf with a graph of the heap allocations.
-The numbers in the graph will all be zero, because they are in MB. Just look at the percentages instead. They show the live memory (of the node and the subtree), meaning the memory that was still in use at the end.
-
+```　。
+它会产生一个包含堆栈分配曲线图的PDF文件。图表中的数字都是0因这是在MB中。可以参考的是各个应用所占堆栈的百分比，他们表示应用占用的实时内存。
 
 ## Sending MAVLink debug key / value pairs
 
